@@ -2,7 +2,7 @@ node_modules/
 package-lock.json
 /src
 tsconfig.json
-eslintrs.js
+.eslintrc.js
 tsconfig.json
-prettierrc.json
+.prettierrc.json
 tsconfig.tsbuildinfo

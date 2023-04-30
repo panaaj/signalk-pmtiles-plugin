@@ -17,13 +17,12 @@
   "keywords": [
     "signalk",
     "signalk-node-server-plugin",
-    "nautic",
+    "signalk-category-chart-plotters",
     "chart",
     "pmtiles"
   ],
   "author": {
-    "name": "AdrianP",
-    "email": "panaaj@hotmail.com"
+    "name": "AdrianP"
   },
   "dependencies": {
     "bluebird": "^3.7.2",
