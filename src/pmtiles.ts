@@ -3,7 +3,7 @@ import { forOwn } from 'lodash'
 import { ChartProvider } from './types'
 import { PMTILES } from './index'
 
-export async function openPMTilesFile(
+export function openPMTilesFile(
   baseDir: string,
   filename: string,
   urlBase: string

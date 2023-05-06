@@ -1,4 +1,3 @@
-import * as bluebird from 'bluebird'
 import path from 'path'
 import * as _ from 'lodash'
 import { ChartProvider } from './types'
@@ -77,9 +76,10 @@ module.exports = (server: ChartProviderApp): Plugin => {
   }
 
   const doStartup = async (config: Config) => {
-
     if (Number(process.versions.node.split('.')[0]) < 18) {
-      console.log(`Unsupported NodeJS version: ${process.versions.node}.\n Requires version 18.0.0 or later.`)
+      console.log(
+        `Unsupported NodeJS version: ${process.versions.node}.\n Requires version 18.0.0 or later.`
+      )
       server.setPluginError('Requires NodeJS verion >= 18.0.0.')
       return
     }
@@ -105,16 +105,8 @@ module.exports = (server: ChartProviderApp): Plugin => {
     server.debug('**urlBase**', urlBase)
     server.setPluginStatus('Started')
 
-    // populate PMTiles metadata (requires router paths to be active)
-    const loadProviders = bluebird
-      .mapSeries([chartPath], (cPath: string) =>
-        scanForCharts(cPath, urlBase)
-      )
-      .then((list: ChartProvider[]) =>
-        _.reduce(list, (result, charts) => _.merge({}, result, charts), {})
-      )
-
-      return loadProviders
+    /** Find charts (Note: Router paths must be active!) */
+    scanForCharts(chartPath, urlBase)
       .then((charts: { [key: string]: ChartProvider }) => {
         server.debug(
           `Chart plugin: Found ${
@@ -122,15 +114,18 @@ module.exports = (server: ChartProviderApp): Plugin => {
           } charts from ${chartPath}`
         )
         chartProviders = _.merge({}, charts)
+        // populate provider metadata
         getMetadata(chartProviders)
       })
       .catch((e: Error) => {
-        console.error(`Error loading chart providers`, e.message)
+        const msg = `Error loading chart providers!`
+        console.error(msg, e.message)
         chartProviders = {}
-        server.setPluginError(`Error loading chart providers`)
+        server.setPluginError(msg)
       })
   }
 
+  /** Register router paths */
   const registerRoutes = () => {
     server.debug('** Registering API paths **')
 
@@ -180,7 +175,7 @@ module.exports = (server: ChartProviderApp): Plugin => {
     })
   }
 
-  // Resources API provider registration
+  /** Register Signal K server Resources API provider */
   const registerAsProvider = () => {
     server.debug('** Registering as Resource Provider for `charts` **')
     try {
@@ -193,7 +188,7 @@ module.exports = (server: ChartProviderApp): Plugin => {
             server.debug(`** listResources()`, params)
             return Promise.resolve(
               _.mapValues(chartProviders, (provider) =>
-              cleanChartProvider(provider, 2)
+                cleanChartProvider(provider, 2)
               )
             )
           },
@@ -223,6 +218,7 @@ module.exports = (server: ChartProviderApp): Plugin => {
   return plugin
 }
 
+/** Format chart data returned to the requestor. */
 const cleanChartProvider = (provider: ChartProvider, version = 1) => {
   let v
   if (version === 1) {
@@ -242,38 +238,47 @@ const cleanChartProvider = (provider: ChartProvider, version = 1) => {
   return _.merge(provider, v)
 }
 
+/** Check chart path exists. Create it if it doesn't. */
 const checkChartPath = (path: string) => {
   access(path, constants.R_OK, () => {
     console.log(`**** path ${path} not found!... creating it....`)
-    mkdirSync(path, {recursive: true})
+    mkdirSync(path, { recursive: true })
   })
 }
 
-const scanForCharts = async (chartBaseDir: string, urlBase: string) => {
+/** Process chart files in provided path. */
+const scanForCharts = async (
+  chartBaseDir: string,
+  urlBase: string
+): Promise<{ [key: string]: ChartProvider }> => {
   try {
-   const files = await fsp.readdir(chartBaseDir, { withFileTypes: true })
-   const result = await bluebird.mapSeries(files, (file: Dirent) => {
-      if (file.name.match(/\.pmtiles$/i)) {
-        return openPMTilesFile(chartBaseDir, file.name, urlBase)
-      } else {
-        return Promise.resolve(null)
-      }
-    })
-    const charts: ChartProvider[] =_.filter(result, _.identity)
-    return _.reduce(
-      charts,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (result: any, chart: ChartProvider) => {
-        result[chart.identifier] = chart
-        return result
+    const files = await fsp.readdir(chartBaseDir, { withFileTypes: true })
+
+    const charts: Array<ChartProvider | null> = files
+      .map((file: Dirent) => {
+        if (file.name.match(/\.pmtiles$/i)) {
+          return openPMTilesFile(chartBaseDir, file.name, urlBase)
+        } else {
+          return null
+        }
+      })
+      .filter((entry: ChartProvider | null) => {
+        return entry
+      })
+    const result: { [key: string]: ChartProvider } = {}
+    _.reduce(
+      charts as ChartProvider[],
+      (entry: { [key: string]: ChartProvider }, chart: ChartProvider) => {
+        entry[chart.identifier] = chart
+        return entry
       },
-      {}
+      result
     )
-  }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  catch (err: any) {
+    return result
+  } catch (err) {
     console.error(
-      `Error reading charts directory ${chartBaseDir}:${err.message}`
+      `Error reading charts directory ${chartBaseDir}:${(err as Error).message}`
     )
+    return {}
   }
 }

@@ -25,7 +25,6 @@
     "name": "AdrianP"
   },
   "dependencies": {
-    "bluebird": "^3.7.2",
     "lodash": "^4.17.11",
     "pmtiles": "^2.7.0"
   },
