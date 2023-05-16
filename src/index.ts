@@ -76,6 +76,8 @@ module.exports = (server: ChartProviderApp): Plugin => {
   }
 
   const doStartup = async (config: Config) => {
+    server.debug('** starting..... **')
+    server.debug(`*** Loaded Configuration: ${JSON.stringify(config)}`)
     if (Number(process.versions.node.split('.')[0]) < 18) {
       console.log(
         `Unsupported NodeJS version: ${process.versions.node}.\n Requires version 18.0.0 or later.`
@@ -84,7 +86,6 @@ module.exports = (server: ChartProviderApp): Plugin => {
       return
     }
 
-    server.debug('** loaded config: ', config)
     props = { ...config }
 
     let chartPath: string

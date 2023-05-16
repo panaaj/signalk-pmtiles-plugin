@@ -65,7 +65,7 @@ _Example: `/signalk/v1/api/resources/charts`_
 
 The plugin also creates a path from which map tile data is served `/pmtiles`.
 
-Visiting this url will display a list of discovered PMTiles files _(.pmtiles)_ in the location provided in the `Plugin Config` screen.  
+Visiting this url will display a list of discovered PMTiles files _(.pmtiles)_ in the location provided in the `Plugin Config` screen.
 
 ```
 ["kvarken.pmtiles","NBottenv.pmtiles"]
@@ -88,6 +88,6 @@ Visiting this url will display a list of discovered PMTiles files _(.pmtiles)_ i
 
 ---
 
-## Sytem Requirements
+## System Requirements
 
 - `Signal K` server running on `NodeJS` v18 (or later).
