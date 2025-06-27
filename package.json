@@ -1,6 +1,6 @@
 {
   "name": "signalk-pmtiles-plugin",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "PMTiles chart resource provider plugin for Signal K server",
   "main": "plugin/index.js",
   "scripts": {
