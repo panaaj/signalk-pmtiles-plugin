@@ -1,8 +1,6 @@
 # ProtoMaps (PMTiles) Chart provider for Signal K server
 
-Signal K Node server `resource provider` plugin enabling the use of PMTiles map files.
-
-_**Note: Requires `Signal K` server running on `NodeJS` v18 or later!**_
+Signal K Node server `resource provider` plugin enabling the use of ProtoMaps _(.pmtiles)_ map files.
 
 ---
 
@@ -38,14 +36,14 @@ _Example: `/signalk/v2/api/resources/charts`_
 		"maxzoom": 17,
 		"bounds": [17.899475, 62.6097716, 23.0905151, 63.8346133],
 		"format": "png",
-		"url": "/pmtiles/kvarken.pmtiles",
+		"url": "/signalk/pmtiles/kvarken.pmtiles",
 		"layers": []
 	}
 }
 ```
 
 _Example: `/signalk/v1/api/resources/charts`_
-```
+```JSON
 {
 	"kvarken.pmtiles": {
 		"identifier": "kvarken.pmtiles",
@@ -57,13 +55,13 @@ _Example: `/signalk/v1/api/resources/charts`_
 		"maxzoom": 17,
 		"bounds": [17.899475, 62.6097716, 23.0905151, 63.8346133],
 		"format": "png",
-		"tilemapUrl": "/pmtiles/kvarken.pmtiles",
+		"tilemapUrl": "/signalk/pmtiles/kvarken.pmtiles",
 		"chartLayers": []
 	}
 }
 ```
 
-The plugin also creates a path from which map tile data is served `/pmtiles`.
+To serve the map tiles to the client, the plugin establishes the http endpoint `/signalk/pmtiles` which is used as the base path of the _url / tilemapUrl_ in the chart metadata.
 
 Visiting this url will display a list of discovered PMTiles files _(.pmtiles)_ in the location provided in the `Plugin Config` screen.
 
@@ -86,8 +84,6 @@ Visiting this url will display a list of discovered PMTiles files _(.pmtiles)_ i
 
 1. **Enable** plugin
 
+_Note: When new files are placed in the configured folders, disable / enable the plugin to make them available._
+
 ---
-
-## System Requirements
-
-- `Signal K` server running on `NodeJS` v18 (or later).
