@@ -4,7 +4,7 @@ import { ChartProvider } from './types'
 import { Request, Response, Application } from 'express'
 import {
   Plugin,
-  PluginServerApp,
+  ServerAPI,
   ResourceProviderRegistry
 } from '@signalk/server-api'
 import { access, mkdirSync, Dirent, promises as fsp, constants } from 'fs'
@@ -15,14 +15,9 @@ interface Config {
 }
 
 interface ChartProviderApp
-  extends PluginServerApp,
+  extends ServerAPI,
     ResourceProviderRegistry,
     Application {
-  statusMessage?: () => string
-  error: (msg: string) => void
-  debug: (...msg: unknown[]) => void
-  setPluginStatus: (pluginId: string, status?: string) => void
-  setPluginError: (pluginId: string, status?: string) => void
   config: {
     ssl: boolean
     configPath: string
@@ -103,7 +98,7 @@ module.exports = (server: ChartProviderApp): Plugin => {
     const urlBase = `${server.config.ssl ? 'https' : 'http'}://localhost:${
       server.config.getExternalPort() || 3000
     }`
-    server.debug('**urlBase**', urlBase)
+    server.debug(`**urlBase** ${urlBase}`)
     server.setPluginStatus('Started')
 
     /** Find charts (Note: Router paths must be active!) */
@@ -186,7 +181,7 @@ module.exports = (server: ChartProviderApp): Plugin => {
           listResources: (params: {
             [key: string]: number | string | object | null
           }) => {
-            server.debug(`** listResources()`, params)
+            server.debug(`** listResources() ${params}`)
             return Promise.resolve(
               _.mapValues(chartProviders, (provider) =>
                 cleanChartProvider(provider, 2)
@@ -194,7 +189,7 @@ module.exports = (server: ChartProviderApp): Plugin => {
             )
           },
           getResource: (id: string) => {
-            server.debug(`** getResource()`, id)
+            server.debug(`** getResource() ${id}`)
             const provider = chartProviders[id]
             if (provider) {
               return Promise.resolve(cleanChartProvider(provider, 2))
