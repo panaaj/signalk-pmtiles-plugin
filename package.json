@@ -18,13 +18,19 @@
     "signalk",
     "signalk-node-server-plugin",
     "signalk-category-chart-plotters",
+    "signalk-webapp",
     "chart",
     "pmtiles"
   ],
+  "signalk": {
+    "appIcon": "./webapp_icon.png",
+    "displayName": "Track PMTiles File Generator"
+  },
   "author": {
     "name": "AdrianP"
   },
   "dependencies": {
+    "@js-temporal/polyfill": "^0.5.1",
     "lodash": "^4.17.11",
     "pmtiles": "^2.7.0"
   },
