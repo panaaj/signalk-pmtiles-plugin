@@ -9,6 +9,7 @@ import {
 } from '@signalk/server-api'
 import { access, mkdirSync, Dirent, promises as fsp, constants } from 'fs'
 import { getMetadata, openPMTilesFile } from './pmtiles'
+import { generateTrackGeoJSON } from './track'
 
 interface Config {
   chartPath: string
@@ -61,6 +62,128 @@ module.exports = (server: ChartProviderApp): Plugin => {
     name: 'PMTiles Chart provider',
     schema: () => CONFIG_SCHEMA,
     uiSchema: () => CONFIG_UISCHEMA,
+    registerWithRouter: (router) => {
+      server.debug('** Registering custom routes with router **')
+
+      // Check if History API is available
+      router.get('/check-history-api', async (req: Request, res: Response) => {
+        server.debug(`GET /check-history-api`)
+        try {
+          if (!server.getHistoryApi) {
+            return res.json({ available: false })
+          }
+          await server.getHistoryApi()
+          res.json({
+            available: true
+          })
+        } catch (error) {
+          res.json({
+            available: false
+          })
+        }
+      })
+
+      // Handle track chart generation
+      router.post('/generate-track', async (req: Request, res: Response) => {
+        server.debug(`POST /generate-track`)
+        try {
+          const { startDate, endDate, resolution } = req.body
+
+          // Validate input
+          if (!startDate || !endDate || !resolution) {
+            return res.status(400).json({
+              error: 'Missing required fields: startDate, endDate, resolution'
+            })
+          }
+
+          const validResolutions = ['hour', 'day', 'week', 'month', 'year']
+          if (!validResolutions.includes(resolution)) {
+            return res.status(400).json({
+              error: `Invalid resolution. Must be one of: ${validResolutions.join(
+                ', '
+              )}`
+            })
+          }
+
+          // Validate dates
+          const start = new Date(startDate)
+          const end = new Date(endDate)
+
+          if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            return res.status(400).json({
+              error: 'Invalid date format'
+            })
+          }
+
+          if (start > end) {
+            return res.status(400).json({
+              error: 'Start date must be before end date'
+            })
+          }
+
+          server.debug(
+            `Generating track chart: ${startDate} to ${endDate}, resolution: ${resolution}`
+          )
+
+          // Check if history API is available
+          try {
+            if (!server.getHistoryApi) {
+              return res.status(503).json({
+                error:
+                  'History API not available. Make sure a history plugin is installed and enabled.'
+              })
+            }
+            await server.getHistoryApi()
+          } catch (error) {
+            return res.status(503).json({
+              error:
+                'History API not available. Make sure a history plugin is installed and enabled.'
+            })
+          }
+
+          // Get chart path
+          let chartPath: string
+          if (!props.chartPath) {
+            chartPath = defaultChartsPath
+          } else {
+            chartPath = path.resolve(configBasePath, props.chartPath)
+          }
+
+          // Generate track asynchronously
+          generateTrackGeoJSON(
+            server,
+            chartPath,
+            startDate,
+            endDate,
+            resolution
+          )
+            .then((result: { filename: string; featureCount: number }) => {
+              res.json({
+                success: true,
+                message: `Track chart generated successfully`,
+                filename: result.filename,
+                features: result.featureCount,
+                startDate,
+                endDate,
+                resolution
+              })
+            })
+            .catch((error: Error) => {
+              server.error(`Error generating track: ${error.message}`)
+              res.status(500).json({
+                error: `Failed to generate track: ${error.message}`
+              })
+            })
+        } catch (error) {
+          server.error(
+            `Error generating track chart: ${(error as Error).message}`
+          )
+          res.status(500).json({
+            error: 'Internal server error while generating track chart'
+          })
+        }
+      })
+    },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     start: (settings: any) => {
       doStartup(settings)
