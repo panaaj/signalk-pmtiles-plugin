@@ -1,6 +1,6 @@
 {
   "name": "signalk-pmtiles-plugin",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "PMTiles chart resource provider plugin for Signal K server",
   "main": "plugin/index.js",
   "scripts": {
@@ -32,14 +32,14 @@
   "dependencies": {
     "@js-temporal/polyfill": "^0.5.1",
     "lodash": "^4.17.11",
-    "pmtiles": "^2.7.0"
+    "pmtiles": "^2.7.0",
+    "@signalk/server-api": "^2.10.1"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/panaaj/signalk-pmtiles-plugin"
   },
   "devDependencies": {
-    "@signalk/server-api": "^2.0.0",
     "@types/baconjs": "^0.7.34",
     "@types/express": "^4.17.17",
     "@types/lodash": "^4.14.191",
