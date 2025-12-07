@@ -76,6 +76,48 @@ _Example:_
 ["kvarken.pmtiles","NBottenv.pmtiles"]
 ```
 
+### Charts containing track history
+
+>**Note:** Requires SignalK server version 2.19.0 or later and a History API provider pligin installed _(e.g. `signalk-to-influxdb2`)_
+
+You can check if your signalk server supports the History API by submitting a request to:
+
+```typescript
+HTTP GET /plugins/pmtiles-chart-provider/check-history-api
+```
+Example response:
+```json
+{"available": true}
+```
+
+#### Generate Track Chart
+
+To generate vector charts containing your vessel's track history, submit a POST request to:
+
+```typescript
+HTTP POST /plugins/pmtiles-chart-provider/generate-track {
+	"startDate": '2025-03-30T03:45:000Z",
+	"endDate": '2025-03-31T09:30:000Z", 
+	"resolution": "hour" 
+}
+```
+
+>Valid Resolution values are: 'hour', 'day', 'week', 'month' and 'year'
+
+
+Example response:
+```json
+{
+	"success": true,
+	"message": "Track chart generated successfully",
+	"filename": "track_{startDate}_to_{endDate}.geojson",
+	"features": 567,
+	"startDate": "2025-03-30T03:45:000Z",
+	"endDate": "2025-03-31T09:30:000Z", 
+	"resolution": "hour" 
+}
+```
+
 ---
 ### Usage
 
