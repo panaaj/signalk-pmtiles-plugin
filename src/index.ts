@@ -33,6 +33,8 @@ const apiRoutePrefix = {
   2: '/signalk/v2/api/resources'
 }
 
+export const nameToId = (value: string) => value.replace('.pmtiles', '-pmtiles')
+
 module.exports = (server: ChartProviderApp): Plugin => {
   let chartProviders: { [key: string]: ChartProvider } = {}
   //let pluginStarted = false
@@ -281,11 +283,11 @@ module.exports = (server: ChartProviderApp): Plugin => {
       res.json(Object.keys(chartProviders))
     })
 
-    // routes to fetch PMTiles file contents
-    server.get(`${PMTILES}:identifier`, (req: Request, res: Response) => {
-      server.debug(`GET ${PMTILES}${req.params.identifier}`)
-      const { identifier } = req.params
-      const provider = chartProviders[identifier]
+    // endoint to fetch .pmtiles file contents
+    server.get(`${PMTILES}:fileName`, (req: Request, res: Response) => {
+      server.debug(`GET ${PMTILES}${req.params.fileName}`)
+      const { fileName } = req.params
+      const provider = chartProviders[nameToId(fileName)]
       if (provider) {
         res.sendFile(provider._filePath)
       } else {

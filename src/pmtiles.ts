@@ -1,7 +1,7 @@
 import * as pmtiles from 'pmtiles'
 import { forOwn } from 'lodash'
 import { ChartProvider } from './types'
-import { PMTILES } from './index'
+import { nameToId, PMTILES } from './index'
 
 export function openPMTilesFile(
   baseDir: string,
@@ -14,8 +14,8 @@ export function openPMTilesFile(
     _fileFormat: 'pmtiles',
     _filePath: `${baseDir}/${filename}`,
     _pmtilesHandle: pmt,
-    identifier: filename,
-    name: filename,
+    identifier: nameToId(filename),
+    name: filename.replace('.pmtiles', ''),
     description: '',
     type: 'tilelayer',
     scale: 250000,
