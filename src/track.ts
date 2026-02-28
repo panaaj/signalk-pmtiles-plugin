@@ -77,7 +77,8 @@ export async function generateTrackGeoJSON(
         pathSpecs: [
           {
             path: 'navigation.position' as unknown as Path,
-            aggregate: 'average'
+            aggregate: 'average',
+            parameter: []
           }
         ]
       })
@@ -224,7 +225,7 @@ function processPositionData(data: DataRow[]): number[][][] {
 
   for (const row of data) {
     const timestamp = new Date(row[0])
-    const position = row[1]
+    const position = row[1] as [number, number]
 
     // Skip if no valid position data
     if (
